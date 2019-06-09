@@ -38,4 +38,16 @@ public class RedPacketServiceImpl implements RedPacketService {
     public int decreaseRedPacket(Long id) {
         return redPacketMapper.decreaseRedPacket(id);
     }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
+    public RedPacket getRedPacketForUpdate(Long id) {
+        return redPacketMapper.getRedPacketForUpdate(id);
+    }
+
+    @Override
+    @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
+    public int decreaseRedPacketForVersion(Long id, Long version) {
+        return redPacketMapper.decreaseRedPacketForVersion(id,version);
+    }
 }

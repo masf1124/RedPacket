@@ -14,4 +14,13 @@ public interface UserRedPacketService {
      * @return
      */
     int grabRedPacket(Long redPacketId,Long userId);
+
+    /**
+     * 新增版本号判断
+     * 在扣减红包的同时，版本号增加1
+     * @param redPacketId
+     * @param userId
+     * @return
+     */
+     int grabRedPacketForVersion(Long redPacketId, Long userId);
 }

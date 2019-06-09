@@ -22,4 +22,20 @@ public interface RedPacketService {
      * @return
      */
     int decreaseRedPacket(Long id);
+
+    /**
+     * 使用for update语句加锁（行锁）
+     * @param id
+     * @return
+     */
+    RedPacket getRedPacketForUpdate(Long id);
+
+    /**
+     * 通过版本号扣减抢红包，没更新一次，版本号新增1
+     * 其次增减对版本号的判断
+     * @param id
+     * @param version
+     * @return
+     */
+    int decreaseRedPacketForVersion(Long id,Long version);
 }

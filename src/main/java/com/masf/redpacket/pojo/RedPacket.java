@@ -22,6 +22,6 @@ public class RedPacket implements Serializable {
     private Integer total;
     private Double unitAmount;
     private Integer stock;
-    private Integer version;
+    private Long version;
     private String note;
 }

@@ -24,7 +24,7 @@
                 //jQuery的post请求，请注意是异步请求
                 $.post({
                     //请求抢ID 为1的红包
-                    url:"http://localhost:9100/userRedPacket/grabRedPacket.do?redPacketId=2&userId="+i,
+                    url:"http://localhost:9100/userRedPacket/grabRedPacketForVersion.do?redPacketId=4&userId="+i,
                     success:function(result){}
                 });
             }
