@@ -26,7 +26,7 @@ public class UserRedPacketServiceImpl implements UserRedPacketService {
     private RedPacketMapper redPacketMapper;
 
     //失败
-    private static final int FIELD = 0;
+    private static final int FAILED = 0;
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
@@ -51,38 +51,48 @@ public class UserRedPacketServiceImpl implements UserRedPacketService {
             return result;
         }
         //失败返回
-        return FIELD;
+        return FAILED;
     }
 
     @Override
     @Transactional(isolation = Isolation.READ_COMMITTED, propagation = Propagation.REQUIRED)
     public int grabRedPacketForVersion(Long redPacketId, Long userId) {
-
-        //获取红包信息
-        RedPacket redPacket = redPacketMapper.getRedPacket(redPacketId);
-
-        //当前小红包库存小于0
-        if(redPacket.getStock()>0){
-            //再次传入线程保存的version旧值给SQL判断，是否有其他线程修改过数据
-            int update = redPacketMapper.decreaseRedPacketForVersion(redPacketId,redPacket.getVersion());
-
-            //如果没有数据更新，则说明其他线程已经修改过数据，本次抢红包失败
-            if(update==0){
-                //System.out.println("failed!");
-                return FIELD;
+        //记录开始时间
+        long start = System.currentTimeMillis();
+        //增加重入机制
+        while(true){
+            //获取本次循环时间
+            long end = System.currentTimeMillis();
+            if(end-start>100){
+                return FAILED;
             }
-            //生成抢红包信息
-            UserRedPacket userRedPacket = new UserRedPacket();
-            userRedPacket.setRedPacketId(redPacketId);
-            userRedPacket.setUserId(userId);
-            userRedPacket.setAmount(redPacket.getUnitAmount());
-            userRedPacket.setNote("抢红包"+redPacketId);
-            System.out.println("success!");
-            //插入抢红包信息
-            int result = userRedPacketMapper.grabRedPacket(userRedPacket);
-            return result;
+
+            //获取红包信息
+            RedPacket redPacket = redPacketMapper.getRedPacket(redPacketId);
+
+            //当前小红包库存小于0
+            if(redPacket.getStock()>0){
+                //再次传入线程保存的version旧值给SQL判断，是否有其他线程修改过数据
+                int update = redPacketMapper.decreaseRedPacketForVersion(redPacketId,redPacket.getVersion());
+
+                //如果没有数据更新，则说明其他线程已经修改过数据，本次抢红包失败
+                if(update==0){
+                    //System.out.println("failed!");
+                    continue;
+                }
+                //生成抢红包信息
+                UserRedPacket userRedPacket = new UserRedPacket();
+                userRedPacket.setRedPacketId(redPacketId);
+                userRedPacket.setUserId(userId);
+                userRedPacket.setAmount(redPacket.getUnitAmount());
+                userRedPacket.setNote("抢红包"+redPacketId);
+                //System.out.println("success!");
+                //插入抢红包信息
+                int result = userRedPacketMapper.grabRedPacket(userRedPacket);
+                return result;
+            }
+            //失败返回
+            return FAILED;
         }
-        //失败返回
-        return FIELD;
     }
 }
